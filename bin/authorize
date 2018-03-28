@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+
+require "webrick"
+require 'net/http'
+require 'json'
+
+class MyServlet < WEBrick::HTTPServlet::AbstractServlet
+    attr_reader :conf
+    def initialize *o
+      super
+      
+      @conf = JSON.parse(open('./conf.json').read)
+    end
+
+    def do_GET (request, response)
+        case request.path
+        when "/"
+          
+          url = "https://www.amazon.com/ap/oa?"
+          
+          sd = {
+		    "alexa:all": {
+		        "productID": conf['product_id'],
+		        "productInstanceAttributes": {
+		            "deviceSerialNumber": "#{conf['serial_number']|| '001'}"
+		        }
+		    }
+          }.to_json
+          
+          payload = {"client_id": conf['client_id'], "scope": "alexa:all", "scope_data": sd, "response_type": "code", "redirect_uri": 'http://localhost:5000/code' }
+         
+          url += URI.encode_www_form(payload)
+          
+          response.set_redirect WEBrick::HTTPStatus::TemporaryRedirect, url
+        when "/code"
+		  code = request.query['code']
+		  payload = {"client_id": conf['client_id'], "client_secret": conf['client_secret'], "code": code, "grant_type": "authorization_code", "redirect_uri": URI.encode("http://localhost:5000/code") }
+          url = "https://api.amazon.com/auth/o2/token"
+          resp = Net::HTTP.post_form(URI(url), payload)
+          rt = JSON.parse(resp.body)['refresh_token']
+          
+          if rt  and rt != ''
+            conf['refresh_token'] = rt
+            File.open('./conf.json', "w") do |f| f.puts conf.to_json end
+            response.body = ":D refresh_token: #{rt}"
+            
+            Thread.new do
+              sleep 3
+              exit
+            end if ARGV[0] == "exit"
+          else
+            response.body = "Failed to generate refresh_token :("
+          end
+          
+          response.status = 200
+        when "/authresponse"
+        
+        else
+          response.code = 404
+          response.body = "bad request"
+        end
+    end
+end
+
+server = WEBrick::HTTPServer.new(:Port => 5000)
+
+server.mount "/", MyServlet
+
+trap("INT") {
+    server.shutdown
+}
+
+server.start

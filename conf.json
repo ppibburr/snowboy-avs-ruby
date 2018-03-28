@@ -1,0 +1,18 @@
+{
+	"product_id":    "<PRODUCT_ID>",
+	"client_id":     "<CLIENT_ID>",
+	"client_secret": "<CLIENT_SECRET>",
+	
+	// 001 is default when missing
+	"serial_number": "001",
+	
+	// ./bin/authorize and goto http://localhost:5000 to generate a token if you do not already have one
+	"refresh_token": "<REFRSH_TOKEN_OR_EMPTY>",
+	
+	// Snowboy
+	"snowboy-resource":    "../snowboy/resources/common.res",
+	"snowboy-model":       "../snowboy/resources/models/snowboy.umdl",
+	"snowboy-gain":        1,
+	"snowboy-sensitivity": 0.5 
+}
+

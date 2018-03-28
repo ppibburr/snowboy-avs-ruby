@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+$: << File.join(File.dirname(__FILE__), "..", '..', 'ruby-avs',  "lib")
+$: << File.join(File.dirname(__FILE__), "..", "lib")
+$: << File.join(File.dirname(__FILE__), "..", "..", "snowboy", "bindings", "Ruby", "lib")
+
+require "snowboy"
+require "snowboy/capture/port-audio/port-audio-capture"
+
+require 'avs'
+require 'sample/app'
+
+conf = JSON.parse(open('./conf.json').read)
+
+unless rt=conf['refresh_token'] and rt != ''
+  loop do
+    sleep 1
+    puts "No RefreshToken!"
+    puts "login at: http://localhost:5000"
+ 
+    system "ruby #{File.dirname(__FILE__)}/authorize exit"
+  
+    conf = JSON.parse(open('./conf.json').read)
+  
+    break if rt=conf['refresh_token'] and rt != ''
+  end
+end
+
+app = SnowboyAVS.new(conf).run
+
+
