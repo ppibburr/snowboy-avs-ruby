@@ -1,1 +1,0 @@
-{"messageHeader":{},"messageBody":{"directives":[{"namespace":"Speaker","name":"SetMute","payload":{"mute":false}},{"namespace":"SpeechSynthesizer","name":"speak","payload":{"contentIdentifier":"amzn1.as-ct.v1.Domain:Application:Knowledge#ACRI#7013898c-cd40-463c-864d-3ffeb9ec2c2a","audioContent":"cid:7013898c-cd40-463c-864d-3ffeb9ec2c2a_676660905"}}]}}
